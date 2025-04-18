@@ -1,4 +1,5 @@
 import { Component } from 'react';
+import PropTypes from 'prop-types';
 import MarvelService from '../../services/MarvelService';
 import Spinner from '../spinner/Spinner';
 import ErrorMessage from '../errorMessage/ErrorMessage';
@@ -11,16 +12,12 @@ class CharList extends Component {
         loading: true,
         error: false,
         newItemLoading: false,
-        offset: 7,
+        offset: 0,
         charactersEnded: false
     }
 
 
     marvelService = new MarvelService();
-
-    // componentWillUnmount() { 
-    //     this.onRequest();
-    // }
 
     componentDidMount() { 
         this.onRequest();
@@ -50,7 +47,7 @@ class CharList extends Component {
             characters: [...characters, ...newCharacters],
             loading: false,
             newItemLoading: false,
-            offset: offset + 3,
+            offset: offset + 6,
             charactersEnded: ended
         }))
     }
@@ -62,12 +59,29 @@ class CharList extends Component {
         })
     }
 
+    itemRefs = [];
+
+    setInputRef = elem => {
+        this.itemRefs.push(elem);
+    }
+
+    focusFirstItem = (id) => { 
+        this.itemRefs.forEach(item => item.classList.remove('char__item_selected'))
+        this.itemRefs[id - 1].classList.add('char__item_selected');
+    }
+
+
     renderCharacters = (arr) => { 
         const items = arr.map(item => { 
             return (
                 <li className="char__item"
+                    ref={this.setInputRef}
+                    tabIndex={0}
                     key={item.id}
-                    onClick={() => this.props.onCharacterSelected(item.id)}>
+                    onClick={() => {
+                        this.props.onCharacterSelected(item.id);
+                        this.focusFirstItem(item.id)
+                    }}>
                     <img src={item.thumbnail} alt={item.name} />
                     <div className="char__name">{item.name}</div>
                 </li>
@@ -105,6 +119,10 @@ class CharList extends Component {
         </div>
     )
 }
+}
+
+CharList.propTypes = {
+    onCharacterSelected: PropTypes.func
 }
 
 export default CharList;
